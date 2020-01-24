@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Роман  Григоренко](https://up.htmlacademy.ru/javascript/19/user/958641).
-* Наставник: `Неизвестно`.
+* Наставник: [Али Гасымов](https://htmlacademy.ru/profile/id1317431).
 
 ---
 
