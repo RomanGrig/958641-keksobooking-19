@@ -80,26 +80,53 @@ var renderPins = function (posts) {
   }
   mapPins.appendChild(fragment);
 };
+
 var noticePins = getPosts();
 renderPins(noticePins);
 
 var renderCards = function (posts) {
   var fragment = document.createDocumentFragment();
-  var post = posts[2];
-  console.log('post.author.photos', posts);
-
+  var post = posts[1];
   var card = cardTemplate.cloneNode(true);
   card.querySelector('.popup__title').textContent = post.offer.title;
   card.querySelector('.popup__text--price').textContent = post.offer.price + ' ₽/ночь';
-  card.querySelector('.popup__type').textContent = post.offer.type;
+
+  var noticeType = post.offer.type;
+  if (noticeType === 'palace') {
+    card.querySelector('.popup__type').textContent = 'Дворец';
+  } else if (noticeType === 'bungalo') {
+    card.querySelector('.popup__type').textContent = 'Бунгало';
+  } else if (noticeType === 'house') {
+    card.querySelector('.popup__type').textContent = 'Дом';
+  }
+
   card.querySelector('.popup__text--capacity').textContent = post.offer.rooms + ' комнаты для ' + post.offer.guests + ' гостей';
   card.querySelector('.popup__text--time').textContent = 'Заезд после ' + post.offer.checkin + ', выезд до ' + post.offer.checkout;
-  card.querySelector('.popup__features').classList.add('popup__feature--' + post.offer.features);
+
+  var whatFeatures = function () {
+    var features = card.querySelectorAll('.popup__feature');
+    var featuresChecked = post.offer.features;
+    for (var i = 0; i < features.length; i++) {
+      features[i].classList.add('popup__feature--' + featuresChecked[i]);
+      if (i > featuresChecked.length - 1) {
+        card.querySelector('.popup__features').removeChild(features[i]);
+      }
+    }
+  };
+  whatFeatures();
+
   card.querySelector('.popup__description').textContent = post.offer.description;
-  for (var x = post.offer.photos.length; x > 0; x--) {
-    card.querySelector('.popup__photo').setAttribute('src', post.offer.photos[x]);
-  }
-  console.log('post.author.photos', post.offer.photos[x]);
+  var setPhoto = function () {
+    var photosList = post.offer.photos;
+    for (var i = 0; i < photosList.length; i++) {
+      card.querySelector('.popup__photo').setAttribute('src', photosList[i]);
+      var photo = card.querySelector('.popup__photo').cloneNode(true);
+      card.querySelector('.popup__photos').appendChild(photo);
+    }
+    card.querySelector('.popup__photos').removeChild(photo);
+  };
+  setPhoto();
+
   card.querySelector('.popup__avatar').setAttribute('src', post.author.avatar);
   fragment.appendChild(card);
 
