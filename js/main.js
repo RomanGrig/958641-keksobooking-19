@@ -9,11 +9,24 @@ var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pi
 var cardTemplate = document.querySelector('#card').content.querySelector('.map__card');
 var addressElement = adForm.elements.address;
 var adFieldsetList = adForm.querySelectorAll('.ad-form fieldset');
+var selectedTypeOfHouse = document.getElementById('type');
+var timeIn = document.getElementById('timein');
+var timeOut = document.getElementById('timeout');
+var roomNumber = document.getElementById('room_number');
+var guestQuantity = document.getElementById('capacity');
+
 
 var cardElement = null;
 
 var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
+
+var typesPrices = {
+  'bungalo': 0,
+  'flat': 1000,
+  'house': 5000,
+  'palace': 10000
+};
 
 var typeOfHouse = {
   'flat': 'Квартира',
@@ -148,6 +161,61 @@ function renderCard(post) {
     mapPins.after(cardElement);
   }
 }
+
+function titleValidate() {
+  var inputTitle = document.getElementById('title');
+  inputTitle.addEventListener('input', function (evt) {
+    var target = evt.target;
+    if (target.value.length < 30) {
+      target.setAttribute('required', 'required');
+      target.setCustomValidity('Имя должно состоять минимум из 30-ти символов');
+    } else if (target.value.length > 100) {
+      target.setAttribute('required', 'required');
+      target.setCustomValidity('Имя должно состоять ммаксимум из 100-ти символов');
+    } else {
+      target.setCustomValidity('');
+    }
+  });
+}
+
+function priceValidate() {
+  var inputPrice = document.getElementById('price');
+  inputPrice.addEventListener('input', function (evt) {
+    var target = evt.target;
+    if (target.value > 1000000) {
+      target.setAttribute('required', 'required');
+      target.setCustomValidity('Стоимость не может превышать 1 000 000 ₽');
+    } else {
+      target.setCustomValidity('');
+    }
+  });
+  selectedTypeOfHouse.addEventListener('input', function (evt) {
+    var target = evt.target;
+    inputPrice.setAttribute('min', typesPrices[target.value]);
+    inputPrice.setAttribute('placeholder', typesPrices[target.value]);
+  });
+}
+
+timeIn.addEventListener('change', function () {
+  var timeInIndex = timeIn.options.selectedIndex;
+  timeOut.options.selectedIndex = timeInIndex;
+});
+
+timeOut.addEventListener('change', function () {
+  var timeOutIndex = timeOut.options.selectedIndex;
+  timeIn.options.selectedIndex = timeOutIndex;
+});
+
+roomNumber.addEventListener('change', function (evt) {
+  var target = evt.target;
+  console.log(guestQuantity.options);
+//  if (target.value !== guestQuantity.option.value) {
+//    guestQuantity
+  //}
+});
+
+priceValidate();
+titleValidate();
 
 adFieldsetList.forEach(function (fieldset) {
   fieldset.disabled = true;
