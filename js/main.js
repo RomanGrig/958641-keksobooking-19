@@ -224,6 +224,6 @@ fff
 filtersList.forEach(function (filter) {
   filter.disabled = true;
 });
-
+// ggg
 addressElement.value = '600, 350';
 addressElement.disabled = true;
