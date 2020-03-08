@@ -9,17 +9,38 @@ var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pi
 var cardTemplate = document.querySelector('#card').content.querySelector('.map__card');
 var addressElement = adForm.elements.address;
 var adFieldsetList = adForm.querySelectorAll('.ad-form fieldset');
+var typeElement = adForm.elements.type;
+var timeIn = adForm.elements.timein;
+var timeOut = adForm.elements.timeout;
+var roomsElement = adForm.elements.rooms;
+var priceElement = adForm.elements.price;
+var capacityElement = adForm.elements.capacity;
+var timeElementsForm = adForm.querySelector('.ad-form__element--time');
 
 var cardElement = null;
 
 var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
 
+var minPriceByType = {
+  bungalo: 0,
+  flat: 1000,
+  house: 5000,
+  palace: 10000
+};
+
 var typeOfHouse = {
-  'flat': 'Квартира',
-  'bungalo': 'Бунгало',
-  'house': 'Дом',
-  'palace': 'Дворец'
+  flat: 'Квартира',
+  bungalo: 'Бунгало',
+  house: 'Дом',
+  palace: 'Дворец'
+};
+
+var roomsValuesByGuests = {
+  1: ['1', '2', '3'],
+  2: ['2', '3'],
+  3: ['3'],
+  0: ['100']
 };
 
 mainPin.addEventListener('mousedown', function (event) {
@@ -38,6 +59,53 @@ mainPin.addEventListener('keydown', function (event) {
 
   activatePage();
 });
+
+typeElement.addEventListener('change', function () {
+  priceElement.placeholder = minPriceByType[typeElement.value];
+  validatePrice();
+});
+
+priceElement.addEventListener('input', function () {
+  validatePrice();
+});
+
+roomsElement.addEventListener('change', function () {
+  validateRoomNumber();
+});
+
+capacityElement.addEventListener('change', function () {
+  validateRoomNumber();
+});
+
+timeElementsForm.addEventListener('change', function (event) {
+  timeIn.value = event.target.value;
+  timeOut.value = event.target.value;
+});
+
+adForm.addEventListener('submit', function (event) {
+  event.preventDefault();
+});
+
+function validatePrice() {
+  var price = +priceElement.value;
+  var minPrice = minPriceByType[typeElement.value];
+
+  if (price < minPrice) {
+    priceElement.setCustomValidity('Минимальная цена для этого типа жилья - ' + minPrice + ' рублей');
+  } else {
+    priceElement.setCustomValidity('');
+  }
+}
+
+function validateRoomNumber() {
+  var aviableValues = roomsValuesByGuests[capacityElement.value];
+
+  if (aviableValues.includes(roomsElement.value)) {
+    roomsElement.setCustomValidity('');
+  } else {
+    roomsElement.setCustomValidity('Количество комнат должно быть: ' + aviableValues.join(' или '));
+  }
+}
 
 function activatePage() {
   map.classList.remove('map--faded');
