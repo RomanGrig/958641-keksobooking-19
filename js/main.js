@@ -220,7 +220,7 @@ function renderCard(post) {
 adFieldsetList.forEach(function (fieldset) {
   fieldset.disabled = true;
 });
-
+fff
 filtersList.forEach(function (filter) {
   filter.disabled = true;
 });
