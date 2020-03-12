@@ -217,20 +217,6 @@ function renderPins() {
 function getPinClickHandler(post) {
   return function () {
     renderCard(post);
-    var cardPopup = map.querySelector('.popup');
-    var popupClose = cardPopup.querySelector('.popup__close');
-    cardPopup.classList.add('map__pin--active');
-    cardPopup.classList.remove('hidden');
-    document.addEventListener('keydown', function (event) {
-      if (event.code !== 'ESC') {
-        cardPopup.classList.remove('map__pin--active');
-        cardPopup.classList.add('hidden');
-      }
-    });
-    popupClose.addEventListener('click', function () {
-      cardPopup.classList.remove('map__pin--active');
-      cardPopup.classList.add('hidden');
-    });
   };
 }
 
@@ -239,7 +225,18 @@ function renderCard(post) {
 
   if (notCard) {
     cardElement = cardTemplate.cloneNode(true);
+    var closeButton = cardElement.querySelector('.popup__close');
+    closeButton.addEventListener('click', function () {
+      cardElement.classList.add('hidden');
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        cardElement.classList.add('hidden');
+      }
+    });
   }
+
+  cardElement.classList.remove('hidden');
 
   cardElement.querySelector('.popup__avatar').src = post.author.avatar;
 
@@ -276,11 +273,14 @@ function renderCard(post) {
 
     photos.appendChild(photoElement);
   });
+
   cardElement.querySelector('.popup__photos').replaceWith(photos);
+
   if (notCard) {
     mapPins.after(cardElement);
   }
 }
+
 adFieldsetList.forEach(function (fieldset) {
   fieldset.disabled = true;
 });
@@ -288,6 +288,6 @@ adFieldsetList.forEach(function (fieldset) {
 filtersList.forEach(function (filter) {
   filter.disabled = true;
 });
-// ggg
+
 addressElement.value = '600, 350';
 addressElement.disabled = true;
