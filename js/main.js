@@ -51,36 +51,51 @@ mainPin.addEventListener('mousedown', function (event) {
   }
 
   activatePage();
-  event.preventDefault();
-  var startCoords = {
-    x: event.clientX,
-    y: event.clientY
-  };
+
+  var startX = event.clientX;
+  var startY = event.clientY;
+
+  var minTop = 130 - MAIN_PIN_HEIGHT;
+  var maxTop = 630 - MAIN_PIN_HEIGHT;
+  var minLeft = 0;
+  var maxLeft = map.offsetWidth - MAIN_PIN_WIDTH;
+
   var onMouseMove = function (moveEvent) {
-    moveEvent.preventDefault();
+    var shiftX = startX - moveEvent.clientX;
+    var shiftY = startY - moveEvent.clientY;
 
-    var shift = {
-      x: startCoords.x - moveEvent.clientX,
-      y: startCoords.y - moveEvent.clientY
-    };
+    startX = moveEvent.clientX;
+    startY = moveEvent.clientY;
 
-    startCoords = {
-      x: moveEvent.clientX,
-      y: moveEvent.clientY
-    };
+    var left = mainPin.offsetLeft - shiftX;
+    var top = mainPin.offsetTop - shiftY;
 
-    mainPin.style.top = (mainPin.offsetTop - shift.y) + 'px';
-    mainPin.style.left = (mainPin.offsetLeft - shift.x) + 'px';
+    if (left < minLeft) {
+      left = minLeft;
+    }
 
-    var topMainPinGap = (mainPin.offsetTop - shift.y) + MAIN_PIN_HEIGHT;
-    var leftMainPinGap = (mainPin.offsetLeft - shift.x) + MAIN_PIN_WIDTH / 2;
+    if (left > maxLeft) {
+      left = maxLeft;
+    }
+
+    if (top < minTop) {
+      top = minTop;
+    }
+
+    if (top > maxTop) {
+      top = maxTop;
+    }
+
+    mainPin.style.left = left + 'px';
+    mainPin.style.top = top + 'px';
+
+    var leftMainPinGap = left + MAIN_PIN_WIDTH / 2;
+    var topMainPinGap = top + MAIN_PIN_HEIGHT;
+
     addressElement.value = leftMainPinGap + ', ' + topMainPinGap;
-    console.log(addressElement.value);
   };
 
-  var onMouseUp = function (upEvent) {
-    upEvent.preventDefault();
-
+  var onMouseUp = function () {
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
   };
