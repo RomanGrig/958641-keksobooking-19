@@ -19,6 +19,8 @@ var timeElementsForm = adForm.querySelector('.ad-form__element--time');
 
 var cardElement = null;
 
+var MAIN_PIN_WIDTH = 66;
+var MAIN_PIN_HEIGHT = 80;
 var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
 
@@ -69,6 +71,11 @@ mainPin.addEventListener('mousedown', function (event) {
 
     mainPin.style.top = (mainPin.offsetTop - shift.y) + 'px';
     mainPin.style.left = (mainPin.offsetLeft - shift.x) + 'px';
+
+    var topMainPinGap = (mainPin.offsetTop - shift.y) + MAIN_PIN_HEIGHT;
+    var leftMainPinGap = (mainPin.offsetLeft - shift.x) + MAIN_PIN_WIDTH / 2;
+    addressElement.value = leftMainPinGap + ', ' + topMainPinGap;
+    console.log(addressElement.value);
   };
 
   var onMouseUp = function (upEvent) {
