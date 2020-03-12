@@ -1,6 +1,7 @@
 'use strict';
 
 var map = document.querySelector('.map');
+var main = document.querySelector('main');
 var adForm = document.querySelector('.ad-form');
 var mainPin = map.querySelector('.map__pin--main');
 var mapPins = document.querySelector('.map__pins');
@@ -16,6 +17,8 @@ var roomsElement = adForm.elements.rooms;
 var priceElement = adForm.elements.price;
 var capacityElement = adForm.elements.capacity;
 var timeElementsForm = adForm.querySelector('.ad-form__element--time');
+var errorMessage = document.querySelector('#error').content.querySelector('.error');
+var successMessage = document.querySelector('#success').content.querySelector('.success');
 
 var cardElement = null;
 
@@ -136,7 +139,57 @@ timeElementsForm.addEventListener('change', function (event) {
 
 adForm.addEventListener('submit', function (event) {
   event.preventDefault();
+
+  var formData = new FormData(adForm);
+  formData.append(addressElement.name, addressElement.value);
+
+  var xhr = new XMLHttpRequest();
+  xhr.responseType = 'json';
+
+  xhr.open(adForm.method, 'https://js.dump.academy/keksobooking/');
+
+  xhr.addEventListener('load', function () {
+    if (xhr.status >= 400 && xhr.status < 500) {
+      renderError();
+    } else {
+      renderSuccess();
+    }
+  });
+
+  xhr.send(formData);
 });
+
+function renderError() {
+  var errorElement = errorMessage.cloneNode(true);
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+      errorElement.remove();
+    }
+  });
+
+  errorElement.addEventListener('click', function () {
+    errorElement.remove();
+  });
+
+  main.appendChild(errorElement);
+}
+
+function renderSuccess() {
+  var successElement = successMessage.cloneNode(true);
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+      successElement.remove();
+    }
+  });
+
+  successElement.addEventListener('click', function () {
+    successElement.remove();
+  });
+
+  main.appendChild(successElement);
+}
 
 function validatePrice() {
   var price = +priceElement.value;
