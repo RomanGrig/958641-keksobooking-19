@@ -5,7 +5,8 @@ var main = document.querySelector('main');
 var adForm = document.querySelector('.ad-form');
 var mainPin = map.querySelector('.map__pin--main');
 var mapPins = document.querySelector('.map__pins');
-var filtersList = map.querySelectorAll('.map__filters .map__filter');
+var filtersList = map.querySelectorAll('.map__filters', '.map__filter');
+var filtersForm = map.querySelector('.map__filters');
 var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 var cardTemplate = document.querySelector('#card').content.querySelector('.map__card');
 var addressElement = adForm.elements.address;
@@ -19,7 +20,19 @@ var capacityElement = adForm.elements.capacity;
 var timeElementsForm = adForm.querySelector('.ad-form__element--time');
 var errorMessage = document.querySelector('#error').content.querySelector('.error');
 var successMessage = document.querySelector('#success').content.querySelector('.success');
+var apartmentType = filtersForm.querySelector('#housing-type');
+var apartmentPrice = filtersForm.querySelector('#housing-price');
+var apartmentRooms = filtersForm.querySelector('#housing-rooms');
+var apartmentGuests = filtersForm.querySelector('#housing-guests');
 
+
+filtersForm.addEventListener('change', function (event) {
+  if (event.target.id === apartmentType.id) {
+    apartmentType.value = event.target.value;
+  }
+});
+
+console.log(apartmentType);
 var cardElement = null;
 
 var MAIN_PIN_WIDTH = 66;
@@ -87,7 +100,7 @@ mainPin.addEventListener('mousedown', function (event) {
   document.addEventListener('mousemove', onMouseMove);
   document.addEventListener('mouseup', onMouseUp);
 });
-mainPin.addEventListener('keydown', function (event) {
+document.addEventListener('keydown', function (event) {
   if (event.code !== 'Enter' && event.code !== 'NumpadEnter') {
     return;
   }
@@ -204,7 +217,10 @@ function getPosts(callback) {
 }
 function renderPins() {
   getPosts(function (posts) {
-    // console.log(`posts:`, posts);
+    var filtredPosts = posts.filter(function (post) {
+      return post.offer.type === apartmentType.value;
+    });
+    console.log(filtredPosts);
     var fragment = document.createDocumentFragment();
     for (var i = 0; i < posts.length; i++) {
       var pin = pinTemplate.cloneNode(true);
