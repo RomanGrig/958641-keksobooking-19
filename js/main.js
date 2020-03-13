@@ -1,5 +1,5 @@
 'use strict';
-// f
+
 var map = document.querySelector('.map');
 var main = document.querySelector('main');
 var adForm = document.querySelector('.ad-form');
