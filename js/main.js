@@ -66,9 +66,9 @@
   var previousPin = null;
 
   var ImageAttribute = {
-    alt: 'Фотография жилья',
-    width: 45,
-    height: 40
+    ALT: 'Фотография жилья',
+    WIDTH: 45,
+    HEIGHT: 40
   };
 
   var HttpMethod = {
@@ -77,35 +77,35 @@
   };
 
   var StatusCode = {
-    Ok: 200,
-    NotFound: 404,
-    BadRequest: 400,
-    ServerError: 500,
+    OK: 200,
+    NOT_FOUND: 404,
+    BAD_REQUEST: 400,
+    SERVER_ERROR: 500,
   };
 
 
-  var MinPriceByType = {
+  var minPriceByType = {
     bungalo: 0,
     flat: 1000,
     house: 5000,
     palace: 10000
   };
 
-  var RoomsValuesByGuests = {
+  var roomsValuesByGuests = {
     1: ['1', '2', '3'],
     2: ['2', '3'],
     3: ['3'],
     0: ['100']
   };
 
-  var TypeOfHouse = {
+  var typeOfHouse = {
     'flat': 'Квартира',
     'bungalo': 'Бунгало',
     'house': 'Дом',
     'palace': 'Дворец'
   };
 
-  var PriceValueFilters = {
+  var priceValueFilters = {
     low: {
       min: 0,
       max: 10000,
@@ -123,8 +123,8 @@
   var debouncesRenderPins = window.debounce(renderPins);
 
   function getCardClickHandler(post) {
-    return function (pinEvent) {
-      var pinElement = pinEvent.currentTarget;
+    return function (pinEvt) {
+      var pinElement = pinEvt.currentTarget;
       if (previousPin) {
         previousPin.classList.remove('map__pin--active');
       }
@@ -134,8 +134,8 @@
       var notCard = !cardElement;
       if (notCard) {
         cardElement = card.cloneNode(true);
-        document.addEventListener('keydown', function (event) {
-          if (event.key === ESCAPE) {
+        document.addEventListener('keydown', function (evt) {
+          if (evt.key === ESCAPE) {
             cardElement.classList.add('hidden');
             previousPin.classList.remove('map__pin--active');
           }
@@ -152,7 +152,7 @@
       cardElement.querySelector('.popup__title').textContent = post.offer.title;
       cardElement.querySelector('.popup__text--address').textContent = post.offer.address;
       cardElement.querySelector('.popup__text--price').textContent = post.offer.price + 'Р/ночь';
-      cardElement.querySelector('.popup__type').textContent = TypeOfHouse[post.offer.type];
+      cardElement.querySelector('.popup__type').textContent = typeOfHouse[post.offer.type];
       cardElement.querySelector('.popup__text--capacity').textContent = post.offer.rooms + ' ' + 'комнаты для ' + post.offer.guests + ' гостей';
       cardElement.querySelector('.popup__text--time').textContent = 'Заезд после ' + post.offer.checkin + ' выезд до ' + post.offer.checkout;
 
@@ -171,9 +171,9 @@
         var img = document.createElement('img');
         img.setAttribute('class', 'popup__photo');
         img.setAttribute('src', photo);
-        img.setAttribute('alt', ImageAttribute['alt']);
-        img.setAttribute('width', ImageAttribute['width']);
-        img.setAttribute('height', ImageAttribute['height']);
+        img.setAttribute('alt', ImageAttribute['ALT']);
+        img.setAttribute('width', ImageAttribute['WIDTH']);
+        img.setAttribute('height', ImageAttribute['HEIGHT']);
         photos.appendChild(img);
       });
       cardElement.querySelector('.popup__photos').replaceWith(photos);
@@ -195,7 +195,12 @@
     xhr.open(HttpMethod['GET'], URL);
 
     xhr.onload = function () {
-      callback(xhr.response);
+      if (xhr.status >= StatusCode['BAD_REQUEST'] && xhr.status < StatusCode['SERVER_ERROR']) {
+        // eslint-disable-next-line
+        console.debug('Error when getting posts from the server');
+      } else {
+        callback(xhr.response);
+      }
     };
 
     xhr.send();
@@ -267,7 +272,7 @@
       return false;
     }
 
-    if (priceFilter !== ANY && (!(post.offer.price <= PriceValueFilters[priceFilter]['max'] && post.offer.price > PriceValueFilters[priceFilter]['min']))) {
+    if (priceFilter !== ANY && (!(post.offer.price <= priceValueFilters[priceFilter]['max'] && post.offer.price > priceValueFilters[priceFilter]['min']))) {
       return false;
     }
 
@@ -329,7 +334,7 @@
 
   function validatePrice() {
     var price = +priceElement.value;
-    var minPrice = MinPriceByType[typeElement.value];
+    var minPrice = minPriceByType[typeElement.value];
 
     if (price < minPrice) {
       priceElement.setCustomValidity('Минимальная цена для этого типа жилья - ' + minPrice + ' рублей');
@@ -339,7 +344,7 @@
   }
 
   function validateRoomNumber() {
-    var aviableValues = RoomsValuesByGuests[capacityNumber.value];
+    var aviableValues = roomsValuesByGuests[capacityNumber.value];
 
     if (aviableValues.includes(roomNumber.value)) {
       roomNumber.setCustomValidity('');
@@ -348,8 +353,8 @@
     }
   }
 
-  function handleMouseDown(event) {
-    if (event.button !== 0) {
+  function handleMouseDown(evt) {
+    if (evt.button !== 0) {
       return;
     }
 
@@ -359,17 +364,22 @@
 
     var documentWidth = document.documentElement.offsetWidth;
     var offsetLeft = (documentWidth - mapPins.offsetWidth) / 2 + (MAIN_PIN_WIDTH / 2);
+    var minLeft = -(MAIN_PIN_WIDTH / 2);
+    var maxLeft = mapPins.offsetWidth - (MAIN_PIN_WIDTH / 2);
 
+    function handleMouseMove(moveEvt) {
+      var pageY = moveEvt.pageY;
+      var pageX = moveEvt.pageX;
 
-    function handleMouseMove(moveEvent) {
-      var pageY = moveEvent.pageY;
-      var pageX = moveEvent.pageX;
-
-      var left = pageX < offsetLeft ? 0 : pageX - offsetLeft;
+      var left = pageX - offsetLeft;
       var top = pageY < MARGIN_TOP ? MARGIN_TOP - (MAIN_PIN_HEIGHT / 2) : pageY - (MAIN_PIN_HEIGHT / 2);
 
-      if (pageX > mapPins.offsetWidth + offsetLeft - MAIN_PIN_WIDTH) {
-        left = mapPins.offsetWidth - MAIN_PIN_WIDTH;
+      if (left < minLeft) {
+        left = minLeft;
+      }
+
+      if (left > maxLeft) {
+        left = maxLeft;
       }
 
       if (top > mapPins.offsetHeight - MAIN_PIN_HEIGHT) {
@@ -391,8 +401,8 @@
   function renderSuccess() {
     var successElement = successMessage.cloneNode(true);
 
-    document.addEventListener('keydown', function (event) {
-      if (event.key === ESCAPE) {
+    document.addEventListener('keydown', function (evt) {
+      if (evt.key === ESCAPE) {
         successElement.remove();
       }
     });
@@ -408,8 +418,8 @@
   function renderError() {
     var errorElement = errorMessage.cloneNode(true);
 
-    document.addEventListener('keydown', function (event) {
-      if (event.key === ESCAPE) {
+    document.addEventListener('keydown', function (evt) {
+      if (evt.key === ESCAPE) {
         errorElement.remove();
       }
     });
@@ -455,9 +465,9 @@
       reader.addEventListener('load', function () {
         var img = document.createElement('img');
         img.setAttribute('src', reader.result);
-        img.setAttribute('alt', ImageAttribute['alt']);
-        img.setAttribute('width', ImageAttribute['width']);
-        img.setAttribute('height', ImageAttribute['height']);
+        img.setAttribute('alt', ImageAttribute['ALT']);
+        img.setAttribute('width', ImageAttribute['WIDTH']);
+        img.setAttribute('height', ImageAttribute['HEIGHT']);
         roomImage.appendChild(img);
       });
 
@@ -465,8 +475,8 @@
     }
   });
 
-  mapPinMain.addEventListener('keydown', function (event) {
-    if (event.key === ENTER || event.code === NUM_PAD_ENTER) {
+  mapPinMain.addEventListener('keydown', function (evt) {
+    if (evt.key === ENTER || evt.code === NUM_PAD_ENTER) {
       activatePage();
     }
   });
@@ -476,7 +486,7 @@
   });
 
   typeElement.addEventListener('change', function () {
-    priceElement.placeholder = MinPriceByType[typeElement.value];
+    priceElement.placeholder = minPriceByType[typeElement.value];
     validatePrice();
   });
 
@@ -528,13 +538,13 @@
     hideMapCard();
   }
 
-  resetButton.addEventListener('click', function (event) {
-    event.preventDefault();
+  resetButton.addEventListener('click', function (evt) {
+    evt.preventDefault();
     resetForm();
   });
 
-  adForm.addEventListener('submit', function (event) {
-    event.preventDefault();
+  adForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
 
     var formData = new FormData(adForm);
     formData.append(addressElement.name, addressElement.value);
@@ -545,7 +555,7 @@
     xhr.open(adForm.method, adForm.action);
 
     xhr.addEventListener('load', function () {
-      if (xhr.status >= StatusCode['BadRequest'] && xhr.status < StatusCode['ServerError']) {
+      if (xhr.status >= StatusCode['BAD_REQUEST'] && xhr.status < StatusCode['SERVER_ERROR']) {
         renderError();
       } else {
         renderSuccess();
@@ -555,9 +565,9 @@
     xhr.send(formData);
   });
 
-  timeElementsForm.addEventListener('change', function (event) {
-    timeInForm.value = event.target.value;
-    timeOutForm.value = event.target.value;
+  timeElementsForm.addEventListener('change', function (evt) {
+    timeInForm.value = evt.target.value;
+    timeOutForm.value = evt.target.value;
   });
 
   mapPinMain.addEventListener('mousedown', handleMouseDown);
